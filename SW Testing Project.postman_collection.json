@@ -3,12 +3,12 @@
 		"_postman_id": "35e52972-3b88-461d-b747-c025c029e544",
 		"name": "SW Testing Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "51006593",
-		"_collection_link": "https://eyupcan-2817-9802754.postman.co/workspace/assignment~4c810b59-2794-470d-a7b1-cc2f032aa2f5/collection/51006593-35e52972-3b88-461d-b747-c025c029e544?action=share&source=collection_link&creator=51006593"
+		"_exporter_id": "51013181",
+		"_collection_link": "https://eyupcan-2817-9802754.postman.co/workspace/assignment~4c810b59-2794-470d-a7b1-cc2f032aa2f5/collection/51006593-35e52972-3b88-461d-b747-c025c029e544?action=share&source=collection_link&creator=51013181"
 	},
 	"item": [
 		{
-			"name": "https://jsonplaceholder.typicode.com/users",
+			"name": "GET All Users",
 			"event": [
 				{
 					"listen": "test",
@@ -30,6 +30,20 @@
 							"    pm.expect(jsonData).to.be.an(\"array\");",
 							"    pm.expect(jsonData[0]).to.have.property(\"email\");",
 							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Performans sayacını sıfırla\r",
+							"pm.environment.set(\"totalTime\", 0);\r",
+							"pm.environment.set(\"reqCount\", 0);\r",
+							"console.log(\"Performans sayacı sıfırlandı.\");"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -229,6 +243,148 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Update Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 (Negative Test)\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://jsonplaceholder.typicode.com/posts/99999",
+					"protocol": "https",
+					"host": [
+						"jsonplaceholder",
+						"typicode",
+						"com"
+					],
+					"path": [
+						"posts",
+						"99999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Unsuccessful (Negative)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Hata Kodu Testi (400 Bekliyoruz)\r",
+							"pm.test(\"Negative Test: Status code is 400 (Missing Password)\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"// Hata Mesajı Kontrolü\r",
+							"pm.test(\"Error message is 'Missing password'\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.error).to.eql(\"Missing password\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"peter@klaven\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/login",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"// Sayacı ve toplam süreyi sıfırla (Sadece ilk istekte çalışması için kontrol eklenebilir ama basit tutalım)\r",
+					"if (!pm.environment.get(\"reqCount\") || pm.info.iteration === 0) {\r",
+					"    pm.environment.set(\"totalTime\", 0);\r",
+					"    pm.environment.set(\"reqCount\", 0);\r",
+					"    console.log(\"Performans sayacı başlatıldı.\");\r",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"let totalTime = Number(pm.environment.get(\"totalTime\")) || 0;\r",
+					"let reqCount = Number(pm.environment.get(\"reqCount\")) || 0;\r",
+					"\r",
+					"\r",
+					"totalTime += pm.response.responseTime;\r",
+					"reqCount += 1;\r",
+					"\r",
+					"\r",
+					"pm.environment.set(\"totalTime\", totalTime);\r",
+					"pm.environment.set(\"reqCount\", reqCount);\r",
+					"\r",
+					"\r",
+					"let averageTime = totalTime / reqCount;\r",
+					"\r",
+					"\r",
+					"pm.test(`Performance: Running Average (${Math.round(averageTime)}ms) is under 400ms`, function () {\r",
+					"    pm.expect(averageTime).to.be.below(400); \r",
+					"});"
+				]
+			}
 		}
 	]
 }
